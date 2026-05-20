@@ -34,7 +34,7 @@ Questo file è la **fonte assoluta della verità** tecnica, architetturale, oper
 
 ## 2. Architettura e Stato del Progetto
 
-Ultimo allineamento verificato: 2026-04-10 (separazione camere/servizi + prezzo camere + recovery bootstrap Docker/Prisma + promo banner globale + hardening stack Docker + Tourism POI View + governance documentale + collaudo profondo pre-produzione + README operativo + dependency hygiene + audit zero + lint baseline).
+Ultimo allineamento verificato: 2026-05-21 (added GHCR permissions to CI/CD + separation cameras/services + global promo banner + docker hardening).
 
 ### Topologia Reale
 1. Il browser raggiunge `frontend` (nginx).
@@ -49,6 +49,7 @@ Ultimo allineamento verificato: 2026-04-10 (separazione camere/servizi + prezzo 
 - **Backend**: Node.js 20, Express 4, TypeScript, Prisma 5, Sharp, Nodemailer.
 - **Database**: SQLite.
 - **Deployment**: Docker Compose.
+- **CI/CD**: GitHub Actions (GHCR with `packages: write` permissions).
 
 ---
 
