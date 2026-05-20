@@ -1,6 +1,7 @@
 {
   "name": "hotel-backend",
   "version": "1.0.0",
+  "license": "GPL-3.0-or-later",
   "scripts": {
     "dev": "ts-node-dev --respawn src/index.ts",
     "build": "prisma generate && tsc && node -e \"const fs=require('fs'); fs.rmSync('dist/backend/generated',{recursive:true,force:true}); fs.mkdirSync('dist/backend/generated',{recursive:true}); fs.cpSync('generated/prisma-client-app','dist/backend/generated/prisma-client-app',{recursive:true});\"",
