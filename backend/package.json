@@ -1,0 +1,60 @@
+{
+  "name": "hotel-backend",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "ts-node-dev --respawn src/index.ts",
+    "build": "prisma generate && tsc && node -e \"const fs=require('fs'); fs.rmSync('dist/backend/generated',{recursive:true,force:true}); fs.mkdirSync('dist/backend/generated',{recursive:true}); fs.cpSync('generated/prisma-client-app','dist/backend/generated/prisma-client-app',{recursive:true});\"",
+    "start": "node dist/backend/src/index.js",
+    "lint": "eslint src scripts --max-warnings=0",
+    "lint:fix": "eslint src scripts --fix",
+    "db:prepare": "node -e \"require('fs').mkdirSync('prisma/data', { recursive: true })\"",
+    "db:migrate": "npm run db:prepare && prisma db push --accept-data-loss",
+    "db:seed": "node dist/backend/src/seed.js",
+    "db:setup": "npm run db:prepare && prisma db push --accept-data-loss && node dist/backend/src/seed.js",
+    "media:repair": "node scripts/repair-media-catalog.js",
+    "auth:hash-password": "node scripts/hash-password.js"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.19.3",
+    "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.3.1",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "nodemailer": "^8.0.5",
+    "prisma": "^6.19.3",
+    "sanitize-html": "^2.17.2",
+    "sharp": "^0.34.4",
+    "uuid": "^11.1.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/bcrypt": "^6.0.0",
+    "@types/cookie-parser": "^1.4.7",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/multer": "^1.4.11",
+    "@types/node": "^20.19.39",
+    "@types/nodemailer": "^8.0.0",
+    "@types/uuid": "^9.0.8",
+    "eslint": "^10.2.0",
+    "globals": "^17.4.0",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.4.5",
+    "typescript-eslint": "^8.58.1"
+  },
+  "overrides": {
+    "express": {
+      "path-to-regexp": "0.1.13"
+    },
+    "ts-node-dev": {
+      "brace-expansion": "1.1.13",
+      "picomatch": "2.3.2"
+    }
+  }
+}

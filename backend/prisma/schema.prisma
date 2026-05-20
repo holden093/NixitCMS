@@ -1,0 +1,264 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma-client-app"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+}
+
+model SiteSettings {
+  id                Int     @id
+  hotelName         String  @default("")
+  logoKey           String  @default("")
+  heroImageKey      String  @default("")
+  legalName         String  @default("")
+  registeredAddress String  @default("")
+  city              String  @default("")
+  region            String  @default("")
+  postalCode        String  @default("")
+  country           String  @default("")
+  vatNumber         String  @default("")
+  taxCode           String  @default("")
+  phone             String  @default("")
+  email             String  @default("")
+  mapLat            Float   @default(41.9028)
+  mapLng            Float   @default(12.4964)
+  mapZoom           Int     @default(14)
+  defaultLocale     String  @default("it")
+  octorateKey       String  @default("")
+  promoIsActive     Boolean @default(false)
+  promoText_it      String?
+  promoText_en      String?
+  promoLink         String?
+}
+
+model Page {
+  id        Int      @id @default(autoincrement())
+  slug      String   @unique
+  isVisible Boolean  @default(true)
+  updatedAt DateTime @updatedAt
+  content   Content?
+}
+
+model Content {
+  id          Int      @id @default(autoincrement())
+  pageSlug    String   @unique
+  page        Page     @relation(fields: [pageSlug], references: [slug])
+  title_it    String   @default("")
+  title_en    String   @default("")
+  subtitle_it String   @default("")
+  subtitle_en String   @default("")
+  body_it     String   @default("")
+  body_en     String   @default("")
+  sections_it String   @default("{}")
+  sections_en String   @default("{}")
+  updatedAt   DateTime @updatedAt
+}
+
+model PointOfInterest {
+  id        Int      @id @default(autoincrement())
+  name_it   String
+  name_en   String
+  description_it String @default("")
+  description_en String @default("")
+  lat       Float
+  lng       Float
+  category  String   @default("other")
+  createdAt DateTime @default(now())
+
+  @@index([category])
+}
+
+model MediaFile {
+  id                          Int                 @id @default(autoincrement())
+  key                         String              @unique
+  thumbnailKey                String?
+  filename                    String
+  mimeType                    String
+  size                        Int
+  isPublic                    Boolean             @default(true)
+  uploadedAt                  DateTime            @default(now())
+  categories                  MediaFileCategory[]
+  servicesUsingAsPreview      Service[]           @relation("ServicePreviewMedia")
+  roomsUsingAsPreview         RoomCategory[]      @relation("RoomCategoryPreviewMedia")
+  newsArticlesUsingAsFeatured NewsArticle[]       @relation("NewsFeaturedMedia")
+}
+
+model PhotoCategory {
+  id        Int      @id @default(autoincrement())
+  slug      String   @unique
+  name_it   String
+  name_en   String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  media    MediaFileCategory[]
+  services Service[]
+  rooms    RoomCategory[]
+}
+
+model MediaFileCategory {
+  id              Int           @id @default(autoincrement())
+  mediaFileId     Int
+  photoCategoryId Int
+  mediaFile       MediaFile     @relation(fields: [mediaFileId], references: [id], onDelete: Cascade)
+  photoCategory   PhotoCategory @relation(fields: [photoCategoryId], references: [id], onDelete: Cascade)
+
+  @@unique([mediaFileId, photoCategoryId])
+  @@index([mediaFileId])
+  @@index([photoCategoryId])
+}
+
+model Service {
+  id              Int            @id @default(autoincrement())
+  slug            String         @unique
+  name_it         String
+  name_en         String
+  description_it  String         @default("")
+  description_en  String         @default("")
+  isPublic        Boolean        @default(true)
+  sortOrder       Int            @default(0)
+  photoCategoryId Int?
+  photoCategory   PhotoCategory? @relation(fields: [photoCategoryId], references: [id], onDelete: SetNull)
+  previewMediaId  Int?
+  previewMedia    MediaFile?     @relation("ServicePreviewMedia", fields: [previewMediaId], references: [id], onDelete: SetNull)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
+
+model RoomCategory {
+  id              Int            @id @default(autoincrement())
+  slug            String         @unique
+  name_it         String
+  name_en         String
+  description_it  String         @default("")
+  description_en  String         @default("")
+  occupancy       Int
+  sizeSqm         Int
+  price           Int?
+  isPublic        Boolean        @default(true)
+  sortOrder       Int            @default(0)
+  photoCategoryId Int?
+  photoCategory   PhotoCategory? @relation(fields: [photoCategoryId], references: [id], onDelete: SetNull)
+  previewMediaId  Int?
+  previewMedia    MediaFile?     @relation("RoomCategoryPreviewMedia", fields: [previewMediaId], references: [id], onDelete: SetNull)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
+
+model BookingProvider {
+  id        Int      @id @default(autoincrement())
+  type      String
+  label     String
+  config    String
+  isEnabled Boolean  @default(false)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isEnabled, order])
+}
+
+model NewsArticle {
+  id                     Int                 @id @default(autoincrement())
+  slug                   String              @unique
+  title_it               String
+  title_en               String
+  excerpt_it             String              @default("")
+  excerpt_en             String              @default("")
+  bodyJson_it            String              @default("{}")
+  bodyJson_en            String              @default("{}")
+  bodyHtml_it            String              @default("")
+  bodyHtml_en            String              @default("")
+  status                 String              @default("draft")
+  publishToSite          Boolean             @default(true)
+  publishToNewsletter    Boolean             @default(false)
+  publishToFacebook      Boolean             @default(false)
+  publishToInstagram     Boolean             @default(false)
+  featuredMediaId        Int?
+  featuredMedia          MediaFile?          @relation("NewsFeaturedMedia", fields: [featuredMediaId], references: [id], onDelete: SetNull)
+  scheduledAt            DateTime?
+  publishedAt            DateTime?
+  newsletterDispatchedAt DateTime?
+  newsletterError        String              @default("")
+  facebookPublishedAt    DateTime?
+  facebookError          String              @default("")
+  instagramPublishedAt   DateTime?
+  instagramError         String              @default("")
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime            @updatedAt
+  emailDeliveries        NewsEmailDelivery[]
+
+  @@index([status, scheduledAt])
+  @@index([publishedAt])
+}
+
+model NewsletterSubscriber {
+  id                          Int                 @id @default(autoincrement())
+  email                       String              @unique
+  locale                      String              @default("it")
+  status                      String              @default("pending")
+  confirmTokenHash            String              @default("")
+  unsubscribeToken            String              @default("")
+  confirmTokenExpiresAt       DateTime?
+  unsubscribeTokenHash        String              @default("")
+  consentIp                   String              @default("")
+  consentUserAgent            String              @default("")
+  requestedAt                 DateTime            @default(now())
+  confirmedAt                 DateTime?
+  unsubscribedAt              DateTime?
+  lastConfirmationEmailSentAt DateTime?
+  lastNewsletterSentAt        DateTime?
+  createdAt                   DateTime            @default(now())
+  updatedAt                   DateTime            @updatedAt
+  emailDeliveries             NewsEmailDelivery[]
+
+  @@index([status, updatedAt])
+}
+
+model AsyncJob {
+  id          Int       @id @default(autoincrement())
+  type        String
+  status      String    @default("pending")
+  dedupeKey   String?   @unique
+  payload     String
+  runAt       DateTime  @default(now())
+  attempts    Int       @default(0)
+  maxAttempts Int       @default(5)
+  lastError   String    @default("")
+  lockedAt    DateTime?
+  lockToken   String?
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([status, runAt])
+  @@index([type, status])
+}
+
+model NewsEmailDelivery {
+  id           Int                  @id @default(autoincrement())
+  articleId    Int
+  subscriberId Int
+  status       String               @default("pending")
+  sentAt       DateTime?
+  lastError    String               @default("")
+  attempts     Int                  @default(0)
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+  article      NewsArticle          @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  subscriber   NewsletterSubscriber @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
+
+  @@unique([articleId, subscriberId])
+  @@index([status, updatedAt])
+}

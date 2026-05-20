@@ -1,0 +1,14 @@
+.git
+.claude
+.codex
+.env
+node_modules
+backend/node_modules
+backend/dist
+backend/generated
+backend/prisma/data
+frontend/node_modules
+frontend/node_modules.nobody
+frontend/dist
+CODEX.md
+improvement.md

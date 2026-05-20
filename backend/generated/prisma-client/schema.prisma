@@ -1,0 +1,141 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma-client"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+}
+
+model SiteSettings {
+  id                Int    @id
+  hotelName         String @default("")
+  logoKey           String @default("")
+  heroImageKey      String @default("")
+  legalName         String @default("")
+  registeredAddress String @default("")
+  city              String @default("")
+  region            String @default("")
+  postalCode        String @default("")
+  country           String @default("")
+  vatNumber         String @default("")
+  taxCode           String @default("")
+  phone             String @default("")
+  email             String @default("")
+  mapLat            Float  @default(41.9028)
+  mapLng            Float  @default(12.4964)
+  mapZoom           Int    @default(14)
+  defaultLocale     String @default("it")
+  octorateKey       String @default("")
+}
+
+model Page {
+  id        Int      @id @default(autoincrement())
+  slug      String   @unique
+  isVisible Boolean  @default(true)
+  updatedAt DateTime @updatedAt
+  content   Content?
+}
+
+model Content {
+  id          Int      @id @default(autoincrement())
+  pageSlug    String   @unique
+  page        Page     @relation(fields: [pageSlug], references: [slug])
+  title_it    String   @default("")
+  title_en    String   @default("")
+  subtitle_it String   @default("")
+  subtitle_en String   @default("")
+  body_it     String   @default("")
+  body_en     String   @default("")
+  sections_it String   @default("{}")
+  sections_en String   @default("{}")
+  updatedAt   DateTime @updatedAt
+}
+
+model PointOfInterest {
+  id        Int      @id @default(autoincrement())
+  name_it   String
+  name_en   String
+  lat       Float
+  lng       Float
+  category  String   @default("other")
+  createdAt DateTime @default(now())
+
+  @@index([category])
+}
+
+model MediaFile {
+  id                     Int                 @id @default(autoincrement())
+  key                    String              @unique
+  thumbnailKey           String?
+  filename               String
+  mimeType               String
+  size                   Int
+  isPublic               Boolean             @default(true)
+  uploadedAt             DateTime            @default(now())
+  categories             MediaFileCategory[]
+  servicesUsingAsPreview Service[]           @relation("ServicePreviewMedia")
+}
+
+model PhotoCategory {
+  id        Int      @id @default(autoincrement())
+  slug      String   @unique
+  name_it   String
+  name_en   String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  media    MediaFileCategory[]
+  services Service[]
+}
+
+model MediaFileCategory {
+  id              Int           @id @default(autoincrement())
+  mediaFileId     Int
+  photoCategoryId Int
+  mediaFile       MediaFile     @relation(fields: [mediaFileId], references: [id], onDelete: Cascade)
+  photoCategory   PhotoCategory @relation(fields: [photoCategoryId], references: [id], onDelete: Cascade)
+
+  @@unique([mediaFileId, photoCategoryId])
+  @@index([mediaFileId])
+  @@index([photoCategoryId])
+}
+
+model Service {
+  id              Int            @id @default(autoincrement())
+  slug            String         @unique
+  name_it         String
+  name_en         String
+  description_it  String         @default("")
+  description_en  String         @default("")
+  isPublic        Boolean        @default(true)
+  sortOrder       Int            @default(0)
+  photoCategoryId Int?
+  photoCategory   PhotoCategory? @relation(fields: [photoCategoryId], references: [id], onDelete: SetNull)
+  previewMediaId  Int?
+  previewMedia    MediaFile?     @relation("ServicePreviewMedia", fields: [previewMediaId], references: [id], onDelete: SetNull)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
+
+model BookingProvider {
+  id        Int      @id @default(autoincrement())
+  type      String
+  label     String
+  config    String
+  isEnabled Boolean  @default(false)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isEnabled, order])
+}

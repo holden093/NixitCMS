@@ -1,0 +1,62 @@
+networks:
+  hotel_net:
+    driver: bridge
+
+volumes:
+  app_data:
+  media_data:
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile
+    env_file:
+      - ./.env
+    environment:
+      NODE_ENV: ${BACKEND_NODE_ENV}
+      HOST: ${BACKEND_HOST}
+      PORT: ${BACKEND_PORT}
+      TRUST_PROXY: ${BACKEND_TRUST_PROXY}
+      JSON_BODY_LIMIT: ${BACKEND_JSON_BODY_LIMIT}
+      DATABASE_URL: ${DATABASE_URL}
+    expose:
+      - "${BACKEND_PORT}"
+    ports:
+      - "${BACKEND_HOST_PORT}:${BACKEND_PORT}"
+    volumes:
+      - app_data:/app/backend/prisma/data
+      - media_data:/app/media-storage
+    networks:
+      - hotel_net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "const port=process.env.PORT||3001;fetch('http://localhost:'+port+'/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  frontend:
+    build:
+      context: .
+      dockerfile: ./frontend/Dockerfile
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL}
+        VITE_MEDIA_BASE_URL: ${VITE_MEDIA_BASE_URL}
+    expose:
+      - "8080"
+    ports:
+      - "${FRONTEND_HOST_PORT}:8080"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - hotel_net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO /dev/null http://localhost:8080/ || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

@@ -1,0 +1,70 @@
+# OS Metadata
+.DS_Store
+Thumbs.db
+
+# Dependency Directories
+node_modules/
+jspm_packages/
+bower_components/
+
+# Build Outputs
+dist/
+out/
+build/
+.next/
+.serverless/
+.output/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Environment & Secrets
+.env
+.env.local
+.env.production
+.env.test
+.env.*.local
+*.pem
+*.key
+.pfx
+.cert
+_auth
+
+# Databases & Local Storage
+*.sqlite
+*.sqlite-journal
+*.sqlite-shm
+*.sqlite-wal
+backend/prisma/data/
+media-storage/
+.db
+
+# IDE & Tooling
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.serverless
+.fusebox/
+.dynamodb/
+.tern-port
+.eslintcache
+.stylelintcache
+.parcel-cache
+.cache/
+.next
+
+# Gemini & AI Artifacts
+.gemini/tmp/
+memory/
+
+# Docker Local State
+docker-compose.override.yml
+.docker-build-cache/
+
+# System
+*.log
