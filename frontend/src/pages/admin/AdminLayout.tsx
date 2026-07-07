@@ -105,7 +105,7 @@ export default function AdminLayout() {
                 <a
                   href="/"
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   className="btn-secondary"
                 >
                   Apri sito pubblico

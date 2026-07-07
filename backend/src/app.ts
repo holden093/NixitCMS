@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser'
 import multer from 'multer'
 import { config } from './config'
 import { ApiError } from './lib/http'
+import { isInMaintenanceMode } from './lib/maintenanceMode'
 import { Prisma } from './lib/prismaClient'
 
 import authRouter from './routes/auth'
@@ -46,6 +47,16 @@ app.use(helmet({
 
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok' })
+})
+
+// Maintenance mode guard — placed after /health so healthchecks still pass
+app.use((_req, res, next) => {
+  if (isInMaintenanceMode()) {
+    res.setHeader('Retry-After', '30')
+    res.status(503).json({ error: true, message: 'Maintenance in progress, retry shortly.' })
+    return
+  }
+  next()
 })
 
 app.use('/api', (_req, res, next) => {
@@ -131,12 +142,14 @@ app.use((err: Error, _req: express.Request, res: express.Response, _next: expres
   }
 
   if (err instanceof Prisma.PrismaClientKnownRequestError) {
-    const status = err.code === 'P2025' ? 404 : err.code === 'P2002' ? 409 : 400
+    const status = err.code === 'P2025' ? 404 : err.code === 'P2002' ? 409 : err.code === 'P2003' ? 409 : 400
     const message = err.code === 'P2025'
       ? 'Resource not found'
       : err.code === 'P2002'
         ? 'Resource already exists'
-        : 'Database request failed'
+        : err.code === 'P2003'
+          ? 'Cannot delete — resource is still referenced'
+          : 'Database request failed'
     if (config.nodeEnv !== 'production' && status >= 500) {
       console.error(err)
     }

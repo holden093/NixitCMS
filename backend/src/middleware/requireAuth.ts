@@ -29,6 +29,11 @@ export async function requireAuth(req: AuthRequest, _res: Response, next: NextFu
     req.userId = user.id
     next()
   } catch (error) {
+    if (error instanceof jwt.TokenExpiredError) {
+      next(new ApiError(401, 'Session expired'))
+      return
+    }
+
     if (error instanceof jwt.JsonWebTokenError) {
       next(new ApiError(401, 'Invalid token'))
       return

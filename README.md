@@ -70,7 +70,7 @@ Il tuo sito è ora attivo su:
 ├── frontend/   # React SPA (Pubblica & Admin), Tailwind, i18next
 ├── shared/     # Tipi e logica condivisi tra FE e BE
 ├── MAP.md      # Approfondimento Architetturale
-└── GEMINI.md   # Fonte della Verità Tecnica & Guida per l'Agente
+└── AGENTS.md   # Fonte della Verità Tecnica & Guida per l'Agente
 ```
 
 ---
@@ -91,7 +91,7 @@ UHC fornisce una suite completa di strumenti per i gestori di hotel:
 ## 📖 Documentazione
 
 Per dettagli tecnici profondi, decisioni architetturali e linee guida di sviluppo, consulta:
-- 📘 **[GEMINI.md](./GEMINI.md)**: La "Fonte della Verità" per questo progetto.
+- 📘 **[AGENTS.md](./AGENTS.md)**: La "Fonte della Verità" per questo progetto.
 - 🗺️ **[MAP.md](./MAP.md)**: Topologia del sistema e mappatura dei flussi dati.
 
 ---
@@ -99,10 +99,10 @@ Per dettagli tecnici profondi, decisioni architetturali e linee guida di svilupp
 ## 🤖 Agent Skills
 
 Questo progetto include istruzioni specializzate per gli agenti di codifica IA:
-- **`cms-manager`**: Situata in `.gemini/skills/cms-manager`, fornisce conoscenze procedurali per le operazioni dello stack (migrazioni DB, trasferimento sito, manutenzione).
+- **`cms-manager`**: Situata in `.antigravity/skills/cms-manager`, fornisce conoscenze procedurali per le operazioni dello stack (migrazioni DB, trasferimento sito, manutenzione).
 - **`docker-standard`**: Una regola globale che garantisce che tutte le operazioni siano eseguite via Docker/Podman per mantenere l'integrità dell'ambiente.
 
-Per abilitare queste skill nella tua sessione Gemini CLI, esegui:
+Per abilitare queste skill nella tua sessione Antigravity CLI, esegui:
 ```bash
 /skills reload
 ```

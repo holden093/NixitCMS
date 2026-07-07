@@ -3,8 +3,8 @@ import type { Response } from 'express'
 import { config } from '../../config'
 import { prisma } from '../../lib/prisma'
 import { isMediaVariantPreset, type MediaVariantPreset } from '../../services/images'
-import { fileExists, getMediaVariantKey, getStoredFilePath } from '../../services/storage'
-import { asyncHandler, notFound } from '../../lib/http'
+import { fileExists, getMediaStorageIdFromKey, getMediaVariantKey, getStoredFilePath } from '../../services/storage'
+import { asyncHandler, badRequest, notFound } from '../../lib/http'
 
 const apiRouter = Router()
 export const mediaFilesRouter = Router()
@@ -38,6 +38,11 @@ async function sendMediaFile(res: Response, key: string, variant: MediaVariantPr
   const mediaFile = await findPublicFile(key)
   if (!mediaFile) {
     notFound('File not found')
+  }
+
+  // Defense-in-depth: reject keys without valid UUID-based storage ID
+  if (!getMediaStorageIdFromKey(key)) {
+    badRequest('Invalid media key')
   }
 
   const candidates: Array<{ key: string; contentType: string }> = []

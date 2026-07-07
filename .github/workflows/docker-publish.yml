@@ -7,7 +7,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build-and-test:
+  build-and-lint:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -34,8 +34,20 @@ jobs:
       - name: Build Frontend
         run: npm --prefix frontend run build
 
+      - name: Run Backend Lint
+        run: npm --prefix backend run lint
+
+      - name: Run Frontend Lint
+        run: npm --prefix frontend run lint
+
+      - name: Audit Backend Dependencies
+        run: npm --prefix backend audit --audit-level=high
+
+      - name: Audit Frontend Dependencies
+        run: npm --prefix frontend audit --audit-level=high
+
   docker-build:
-    needs: build-and-test
+    needs: build-and-lint
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:

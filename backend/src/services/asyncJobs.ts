@@ -76,6 +76,7 @@ function parseJobPayload<T extends AsyncJobPayload>(payload: string) {
     // fall through
   }
 
+  console.warn('[async] malformed job payload, falling back to empty object')
   return {} as T
 }
 

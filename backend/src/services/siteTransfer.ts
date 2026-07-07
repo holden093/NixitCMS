@@ -4,8 +4,10 @@ import os from 'os'
 import path from 'path'
 import { config } from '../config'
 import { badRequest, conflict } from '../lib/http'
+import { setMaintenanceMode } from '../lib/maintenanceMode'
 import { prisma } from '../lib/prisma'
 import { syncConfiguredAdminUser } from './adminUser'
+import { startAsyncJobRunner, stopAsyncJobRunner } from './asyncJobs'
 import { reconcileStructuredContent } from './contentSanitizer'
 import { ensureMediaStorage, migrateLegacyMediaStorage, reconcileLocalMediaState } from './storage'
 
@@ -109,8 +111,15 @@ function resolveInsideRoot(rootPath: string, relativePath: string) {
 
 async function runCommand(command: string, args: string[], captureStdout = false) {
   return new Promise<string>((resolve, reject) => {
+    const safeEnv = {
+      PATH: process.env.PATH,
+      HOME: process.env.HOME,
+      NODE_ENV: process.env.NODE_ENV,
+      DATABASE_URL: process.env.DATABASE_URL,
+    }
+
     const child = spawn(command, args, {
-      env: process.env,
+      env: safeEnv,
       stdio: ['ignore', captureStdout ? 'pipe' : 'ignore', 'pipe'],
     })
 
@@ -391,13 +400,21 @@ export async function importSiteTransferArchive(archivePath: string) {
 
       await validateExtractedMediaTree(mediaPath)
 
-      await replaceDatabaseFile(databasePath)
-      await alignImportedDatabaseSchema()
-      await replaceMediaTree(mediaPath)
-      await syncConfiguredAdminUser()
-      await migrateLegacyMediaStorage()
-      await reconcileLocalMediaState()
-      await reconcileStructuredContent()
+      setMaintenanceMode(true)
+      stopAsyncJobRunner()
+
+      try {
+        await replaceDatabaseFile(databasePath)
+        await alignImportedDatabaseSchema()
+        await replaceMediaTree(mediaPath)
+        await syncConfiguredAdminUser()
+        await migrateLegacyMediaStorage()
+        await reconcileLocalMediaState()
+        await reconcileStructuredContent()
+      } finally {
+        setMaintenanceMode(false)
+        startAsyncJobRunner()
+      }
 
       return {
         ok: true,

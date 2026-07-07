@@ -58,8 +58,9 @@ media-storage/
 .cache/
 .next
 
-# Gemini & AI Artifacts
-.gemini/tmp/
+# Antigravity & AI Artifacts
+.antigravity/
+.pi-subagents/
 memory/
 
 # Docker Local State

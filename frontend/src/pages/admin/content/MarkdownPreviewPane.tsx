@@ -6,7 +6,7 @@ export function MarkdownPreviewPane({ value }: { value: string }) {
       <p className="eyebrow mb-4">Anteprima contenuto</p>
       <div className="prose editorial-prose max-w-none">
         {value.trim() ? (
-          <ReactMarkdown>{value}</ReactMarkdown>
+          <ReactMarkdown allowedElements={["p", "strong", "em", "a", "code", "br", "ul", "ol", "li"]}>{value}</ReactMarkdown>
         ) : (
           <p className="text-sm text-muted">Nessun contenuto da mostrare in anteprima.</p>
         )}

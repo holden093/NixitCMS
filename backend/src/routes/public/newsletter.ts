@@ -25,6 +25,14 @@ const newsletterLimiter = rateLimit({
   message: { error: true, message: 'Too many requests, please try again later.' },
 })
 
+const confirmLimiter = rateLimit({
+  windowMs: 60_000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: true, message: 'Too many requests, please try again later.' },
+})
+
 function createToken() {
   return crypto.randomBytes(24).toString('hex')
 }
@@ -112,7 +120,7 @@ router.post('/newsletter/subscribe', requireTrustedOrigin, newsletterLimiter, as
   res.json({ ok: true, status: 'pending' })
 }))
 
-router.get('/newsletter/confirm', asyncHandler(async (req, res) => {
+router.get('/newsletter/confirm', confirmLimiter, asyncHandler(async (req, res) => {
   const token = typeof req.query.token === 'string' ? req.query.token.trim() : ''
   if (!token) {
     res.redirect(302, redirectToNewsletterPage('confirm-invalid'))
@@ -143,7 +151,7 @@ router.get('/newsletter/confirm', asyncHandler(async (req, res) => {
   res.redirect(302, redirectToNewsletterPage('confirmed'))
 }))
 
-router.get('/newsletter/unsubscribe', asyncHandler(async (req, res) => {
+router.get('/newsletter/unsubscribe', confirmLimiter, asyncHandler(async (req, res) => {
   const token = typeof req.query.token === 'string' ? req.query.token.trim() : ''
   if (!token) {
     res.redirect(302, redirectToNewsletterPage('unsubscribe-invalid'))

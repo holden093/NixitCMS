@@ -13,7 +13,8 @@
     "db:seed": "node dist/backend/src/seed.js",
     "db:setup": "npm run db:prepare && prisma db push --accept-data-loss && node dist/backend/src/seed.js",
     "media:repair": "node scripts/repair-media-catalog.js",
-    "auth:hash-password": "node scripts/hash-password.js"
+    "auth:hash-password": "node scripts/hash-password.js",
+    "test": "vitest run"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
@@ -25,7 +26,7 @@
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.5-lts.1",
-    "nodemailer": "^8.0.5",
+    "nodemailer": "^8.0.9",
     "prisma": "^6.19.3",
     "sanitize-html": "^2.17.2",
     "sharp": "^0.34.4",
@@ -47,7 +48,8 @@
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.4.5",
-    "typescript-eslint": "^8.58.1"
+    "typescript-eslint": "^8.58.1",
+    "vitest": "^4.1.10"
   },
   "overrides": {
     "express": {

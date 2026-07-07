@@ -13,18 +13,23 @@ export default function BookingWidget({ provider }: Props) {
 
   const config = useMemo(() => {
     try {
-      return JSON.parse(provider.config) as Record<string, string>
+      const raw = JSON.parse(provider.config)
+      if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
+        return raw as Record<string, unknown>
+      }
+      return {}
     } catch {
       return {}
     }
   }, [provider.config])
 
-  if (provider.type === 'octorate' && config.siteKey) {
+  if (provider.type === 'octorate' && typeof config.siteKey === 'string' && config.siteKey) {
     return <OctorateWidget siteKey={config.siteKey} />
   }
 
   if (provider.type === 'gestore-alberghi') {
-    return <GestoreAlberghiWidget bookingUrl={config.bookingUrl} />
+    const bookingUrl = typeof config.bookingUrl === 'string' ? config.bookingUrl : ''
+    return <GestoreAlberghiWidget bookingUrl={bookingUrl} />
   }
 
   return (

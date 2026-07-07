@@ -25,11 +25,33 @@ function validateBookingProviderType(value: unknown) {
   return value
 }
 
+function validateBookingProviderConfig(type: string, config: string) {
+  if (type !== 'gestore-alberghi') {
+    return
+  }
+
+  const parsed = JSON.parse(config)
+  const url = typeof parsed.bookingUrl === 'string' ? parsed.bookingUrl.trim() : ''
+  if (url) {
+    let parsedUrl: URL
+    try {
+      parsedUrl = new URL(url)
+    } catch {
+      badRequest('bookingUrl must be a valid URL')
+    }
+
+    if (parsedUrl.protocol !== 'https:') {
+      badRequest('bookingUrl must use https://')
+    }
+  }
+}
+
 function normalizeBookingPayload(body: Record<string, unknown>) {
   const type = validateBookingProviderType(body.type)
   const label = trimString(body.label, 'label', 120)
   const config = trimString(body.config, 'config', 8000)
   parseJsonObject(config, 'config')
+  validateBookingProviderConfig(type, config)
   const isEnabled = parseBoolean(body.isEnabled, 'isEnabled')
   const order = parseInteger(body.order, 'order')
 
@@ -82,6 +104,16 @@ async function updateProviderWithSingleActiveRule(id: number | null, data: {
     }
 
     if (id) {
+      const existing = await tx.bookingProvider.findUnique({
+        where: { id },
+        select: { type: true, config: true },
+      })
+      const mergedType = data.type ?? existing?.type
+      const mergedConfig = data.config ?? existing?.config
+      if (mergedType && mergedConfig) {
+        validateBookingProviderConfig(mergedType, mergedConfig)
+      }
+
       return tx.bookingProvider.update({
         where: { id },
         data,

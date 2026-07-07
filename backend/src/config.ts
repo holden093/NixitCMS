@@ -260,7 +260,30 @@ if (smtpHost && !contactEmailTo) {
   fail('CONTACT_EMAIL_TO is required when SMTP_HOST is configured')
 }
 
-export const config: Config = {
+const REDACTED_SENSITIVE_KEYS = new Set([
+  'jwtSecret', 'smtpPass', 'metaAccessToken', 'adminPasswordHash',
+])
+
+type RuntimeConfig = Config & {
+  toJSON(): object
+  [key: symbol]: () => object
+}
+
+function redactedConfigSnapshot(configObj: Record<string, unknown>): Record<string, unknown> {
+  const snapshot: Record<string, unknown> = {}
+  for (const key of Object.keys(configObj)) {
+    const value = configObj[key]
+    if (typeof value === 'function') {
+      continue
+    }
+    snapshot[key] = REDACTED_SENSITIVE_KEYS.has(key)
+      ? '[REDACTED]'
+      : value
+  }
+  return snapshot
+}
+
+export const config: RuntimeConfig = {
   nodeEnv,
   host,
   port,
@@ -306,4 +329,12 @@ export const config: Config = {
   metaAccessTokenExpiresAt: parseOptionalDate('META_ACCESS_TOKEN_EXPIRES_AT'),
   metaFacebookPageId: optionalString('META_FACEBOOK_PAGE_ID'),
   metaInstagramBusinessAccountId: optionalString('META_INSTAGRAM_BUSINESS_ACCOUNT_ID'),
+
+  toJSON() {
+    return redactedConfigSnapshot(this as unknown as Record<string, unknown>)
+  },
+
+  [Symbol.for('nodejs.util.inspect.custom')]() {
+    return redactedConfigSnapshot(this as unknown as Record<string, unknown>)
+  },
 }

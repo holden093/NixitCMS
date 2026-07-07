@@ -40,5 +40,7 @@ RUN mkdir -p prisma/data /app/media-storage \
 
 EXPOSE 3001
 
+USER node
+
 ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["sh", "-c", "npm run db:setup && npm run start"]

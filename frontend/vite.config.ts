@@ -4,7 +4,7 @@ import path from 'path'
 
 export default defineConfig(({ mode }) => {
   const envDir = path.resolve(__dirname, '..')
-  const env = loadEnv(mode, envDir, '')
+  const env = loadEnv(mode, envDir, 'VITE_')
   const proxyTarget = env.VITE_DEV_PROXY_TARGET?.trim()
 
   return {
